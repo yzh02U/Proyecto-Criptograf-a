@@ -159,7 +159,7 @@ El cliente envía la solicitud HTTP con los metadatos necesarios en el header:
 
 ## Verificación:
 
-El servidor valida la autenticidad del mensaje y lo valida:
+El servidor valida la autenticidad del mensaje:
 
 1). El servidor recibe la consulta del cliente y los headers.
 
