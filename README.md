@@ -123,3 +123,16 @@ El diagrama es el siguiente:
 
 <img width="1250" height="1590" alt="image" src="https://github.com/user-attachments/assets/cea24de2-f42b-4e95-80a8-da8b65b586ee" />
 
+
+Entendido el funcionamiento del propio algoritmo, se diseña el protocolo para asegurar su correcto funcionamiento.
+
+# Protocólo:
+
+El proceso se dividirá en cuatro etapas fundamentales: *Preparación, firma, envío y verificación*. 
+## Preparación:
+
+
+
+
+# Referencias:
+- https://csrc.nist.gov/pubs/fips/198-1/final 
