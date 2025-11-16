@@ -66,4 +66,60 @@ El algoritmo central es el siguiete:
 \mathrm{MAC}(\text{text}) = \mathrm{HMAC}(K,\text{text})
 = H\Big((K_0 \oplus \text{opad}) \,\|\, H\big((K_0 \oplus \text{ipad}) \,\|\, \text{text}\big)\Big)
 
- 
+```
+Donde:
+
+
+## Variables y Parámetros del Algoritmo HMAC (FIPS 198-1)
+
+| Símbolo | Definición | Descripción |
+| :---: | :--- | :--- |
+| **$H$** | Función Hash Aprobada | La función hash criptográfica utilizada (ej. SHA-256 o SHA-3). |
+| **$K$** | Clave Secreta | La clave secreta compartida entre el originador y el receptor. |
+| **$K_0$** | Clave Preprocesada | La clave $K$ después de cualquier ajuste de longitud para formar una clave de $B$ bytes. |
+| **$B$** | Tamaño del Bloque | La longitud (en bytes) del bloque de entrada de la función hash (ej. 64 bytes para SHA-1/SHA-256). |
+| **$L$** | Tamaño de Salida | La longitud (en bytes) de la salida de la función hash (ej. 32 bytes para SHA-256). |
+| **text** | Datos del Mensaje | Los datos sobre los que se calcula el HMAC.  |
+| **ipad** | Inner Pad (Relleno Interno) | El byte $x'36'$ repetido $B$ veces. Se utiliza para el hash interno. |
+| **opad** | Outer Pad (Relleno Externo) | El byte $x'5c'$ repetido $B$ veces. Se utiliza para el hash externo. |
+| **$\oplus$** | Operación XOR | Operación **Exclusive-Or**. Se utiliza para combinar la clave con ipad/opad. |
+| **$\|\|$** | Concatenación | Operación para unir dos cadenas de bytes. |
+
+---
+
+Los pasos del algoritmo se muestran en la siguiente tabla:
+
+
+| Paso | Descripción del paso |
+| :---: | :--- |
+| **Paso 1** | Si la longitud de $K = B$: Entonces $K_0 = K$. Ir al paso 4. |
+| **Paso 2** | Si la longitud de $K > B$: hashear $K$ para obtener una cadena de $L$ byte, Luego concatenar $(B-L)$ ceros para crear una cadena de $B$ bytes y $K_0$ (i.e., $K_0 = H(K) \quad || \quad 00...00$). Ir al paso 4. |
+| **Paso 3** | Si la longitud de $K < B$: Agregar ceros al final de $K$ para crear una cadena de $B$- bytes y $K_0$ ( Si $K$ es una cadena de 20 bytes en longitud y $B=64$, entonces $K$ será agregado con 44 ceros en bytes $x'00'$). |
+| **Paso 4** | Hacer XOR $K_0$ con $\text{ipad}$ para generar una cadena de $B$-bytes: $K_0 \oplus \text{ipad}$. |
+| **Paso 5** | Cconcatenar '$\text{text}$' a la cadena resultante del paso 4: $(K_0 \oplus \text{ipad}) \quad || \quad \text{text}$. |
+| **Paso 6** | Aplicar $H$ a la cadena generada en el paso 5: $H((K_0 \oplus \text{ipad}) \quad || \quad \text{text})$. |
+| **Paso 7** | Aplicar XOR $K_0$ con $\text{opad}$: $K_0 \oplus \text{opad}$. |
+| **Paso 8** | Concatena el resultado del paso 6 al paso 7: $(K_0 \oplus \text{opad}) \quad || \quad H((K_0 \oplus \text{ipad}) \quad || \quad \text{text})$. |
+| **Paso 9** | Aplicar $H$ al resultado del paso 8: $H((K_0 \oplus \text{opad}) \quad || \quad H((K_0 \oplus \text{ipad}) \quad || \quad \text{text}))$. |
+
+---
+
+
+
+| Paso | Descripción del paso |
+| :---: | :--- |
+| **Paso 1** | Si la longitud de `K` = `B`: Entonces `K_0 = K`. Ir al paso 4. |
+| **Paso 2** | Si la longitud de `K > B`: Aplicar hash a `K` para obtener una cadena de `L` bytes. Luego concatenar `(B-L)` ceros para crear una cadena de `B` bytes y `K_0` (i.e., `K_0 = H(K) || 0x00...00`). Ir al paso 4. |
+| **Paso 3** | Si la longitud de `K < B`: Agregar ceros al final de `K` para crear una cadena de `B`-bytes y `K_0` (Ej: Si `K` tiene 20 bytes y `B=64`, se agregan 44 ceros `0x00`). |
+| **Paso 4** | Aplicar **XOR** a `K_0` y `ipad` para generar una cadena de `B`-bytes: `K_0 XOR ipad`. |
+| **Paso 5** | **Concatenar** '`text`' a la cadena resultante del paso 4: `(K_0 XOR ipad) || text`. |
+| **Paso 6** | Aplicar la función `H` (hash) a la cadena generada en el paso 5: `H((K_0 XOR ipad) || text)`. |
+| **Paso 7** | Aplicar **XOR** a `K_0` y `opad`: `K_0 XOR opad`. |
+| **Paso 8** | **Concatenar** el resultado del paso 6 al paso 7: `(K_0 XOR opad) || H((K_0 XOR ipad) || text)`. |
+| **Paso 9** | Aplicar la función `H` (hash) al resultado del paso 8: `H((K_0 XOR opad) || H((K_0 XOR ipad) || text))`. |
+
+
+El diagrama es el siguiente:
+
+<img width="1250" height="1590" alt="image" src="https://github.com/user-attachments/assets/cea24de2-f42b-4e95-80a8-da8b65b586ee" />
+
