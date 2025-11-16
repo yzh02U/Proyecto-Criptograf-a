@@ -162,4 +162,5 @@ El servidor valida la autenticidad del mensaje:
 
 
 # Referencias:
-- https://csrc.nist.gov/pubs/fips/198-1/final 
+- https://csrc.nist.gov/pubs/fips/198-1/final
+- https://www.rfc-editor.org/rfc/rfc2104.html
