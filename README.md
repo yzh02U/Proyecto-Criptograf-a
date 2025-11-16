@@ -139,7 +139,7 @@ El cliente envía la solicitud HTTP con los metadatos necesarios en el header:
 
 1). El cliente envía la solicitud HTTP, por ejemplo, `GET /data/profile`.
 
-2). Se incluye en los headers del envío la $${\color{Red}ID}$$, $${\color{Blue}Ts}$$ y $${\color{Yellw}MAC}$$.
+2). Se incluye en los headers del envío la $${\color{Red}ID}$$, $${\color{Blue}Ts}$$ y $${\color{Yellow}MAC}$$.
 
 ## Verificación:
 
