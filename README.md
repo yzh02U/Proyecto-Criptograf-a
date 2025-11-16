@@ -92,22 +92,6 @@ Los pasos del algoritmo se muestran en la siguiente tabla:
 
 | Paso | Descripción del paso |
 | :---: | :--- |
-| **Paso 1** | Si la longitud de $K = B$: Entonces $K_0 = K$. Ir al paso 4. |
-| **Paso 2** | Si la longitud de $K > B$: hashear $K$ para obtener una cadena de $L$ byte, Luego concatenar $(B-L)$ ceros para crear una cadena de $B$ bytes y $K_0$ (i.e., $K_0 = H(K) \quad || \quad 00...00$). Ir al paso 4. |
-| **Paso 3** | Si la longitud de $K < B$: Agregar ceros al final de $K$ para crear una cadena de $B$- bytes y $K_0$ ( Si $K$ es una cadena de 20 bytes en longitud y $B=64$, entonces $K$ será agregado con 44 ceros en bytes $x'00'$). |
-| **Paso 4** | Hacer XOR $K_0$ con $\text{ipad}$ para generar una cadena de $B$-bytes: $K_0 \oplus \text{ipad}$. |
-| **Paso 5** | Cconcatenar '$\text{text}$' a la cadena resultante del paso 4: $(K_0 \oplus \text{ipad}) \quad || \quad \text{text}$. |
-| **Paso 6** | Aplicar $H$ a la cadena generada en el paso 5: $H((K_0 \oplus \text{ipad}) \quad || \quad \text{text})$. |
-| **Paso 7** | Aplicar XOR $K_0$ con $\text{opad}$: $K_0 \oplus \text{opad}$. |
-| **Paso 8** | Concatena el resultado del paso 6 al paso 7: $(K_0 \oplus \text{opad}) \quad || \quad H((K_0 \oplus \text{ipad}) \quad || \quad \text{text})$. |
-| **Paso 9** | Aplicar $H$ al resultado del paso 8: $H((K_0 \oplus \text{opad}) \quad || \quad H((K_0 \oplus \text{ipad}) \quad || \quad \text{text}))$. |
-
----
-
-
-
-| Paso | Descripción del paso |
-| :---: | :--- |
 | **Paso 1** | Si la longitud de `K` = `B`: Entonces `K_0 = K`. Ir al paso 4. |
 | **Paso 2** | Si la longitud de `K > B`: Aplicar hash a `K` para obtener una cadena de `L` bytes. Luego concatenar `(B-L)` ceros para crear una cadena de `B` bytes y `K_0` (i.e., `K_0 = H(K) || 0x00...00`). Ir al paso 4. |
 | **Paso 3** | Si la longitud de `K < B`: Agregar ceros al final de `K` para crear una cadena de `B`-bytes y `K_0` (Ej: Si `K` tiene 20 bytes y `B=64`, se agregan 44 ceros `0x00`). |
