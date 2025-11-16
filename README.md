@@ -128,8 +128,44 @@ Entendido el funcionamiento del propio algoritmo, se diseña el protocolo para a
 
 # Protocólo:
 
-El proceso se dividirá en cuatro etapas fundamentales: *Preparación, firma, envío y verificación*. 
+El proceso se dividirá en cuatro etapas fundamentales: *Preparación, firma, envío y verificación*. Para ser más específico, el contexto de la implementación será llevado en un modelo cliente-servidor para consultas de API bajo el modelo REST, pudiendo así, el usuario consultar recursos al servidor mediante los verbos GET, PUT, POST, etc.   
+
 ## Preparación:
+El cliente recopila los datos necesarios para la autenticación y la integridad:
+
+1). El cliente se registra en una plataforma al cual desea consultar recursos. Al momento del registro solicita una API Key o Token al servidor, de manera que el cliente pueda consultar recursos y el servidor le permitar autenticar el usuario. El Token debe ser enviado al cliente mediante un canal seguro distinto al convencional, en donde se realizarían las consultas. Existen protocolos que lo implementan como TLS, una versión mejorada del SSL.
+
+2). El cliente genera su $${\color{Red}ID}$$ de identificador en la plataforma.
+
+3). El cliente genera un time stamp $${\color{Blue}Ts}$$.
+
+4). El cliente define el método `HTTP` (GET, POST, PUT, etc) con su respectiva `URI`.
+
+
+## Firma:
+Se genera el firmado del código MAC del cliente:
+
+1). Se construye la cadena concatenada a firmar: `ID||Ts||URL`.
+2). Se utiliza el algoritmo HMAC pasando como parámetro la llave compartida API KEY y la cadena a firmar para obtener el MAC final; esto es `HMAC(API KEY, ID||Ts||URL)`. 
+
+## Envío:
+
+El cliente envía la solicitud HTTP con los metadatos necesarios en el header:
+
+1). El cliente envía la solicitud HTTP, por ejemplo, `GET /data/profile`
+2). Se incluye en los headers del envío la $${\color{Red}ID}$$, $${\color{Blue}Ts}$$ y $${\color{Yellos}MAC}$$.
+
+## Verificación:
+
+El servidor valida la autenticidad del mensaje y lo valida:
+
+1). El servidor recibe la consulta del cliente y los headers.
+2). El servidor primero valida que el timestamp esté dentro de la ventana del tiempo.
+3). El servidor construye la cadena el cuál utilizó el cliente para el firmado en base a los parámetros del header.
+4). El servidor busca la API Key del cliente.
+5). Calcula el MAC usando el algoritmo HMAC.
+6). Finalmente compara las firmas, y en base al resultado envía un código 200 con la respuesta esperada 
+
 
 
 
