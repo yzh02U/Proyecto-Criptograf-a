@@ -146,13 +146,15 @@ El cliente recopila los datos necesarios para la autenticación y la integridad:
 Se genera el firmado del código MAC del cliente:
 
 1). Se construye la cadena concatenada a firmar: `ID||Ts||URL`.
+
 2). Se utiliza el algoritmo HMAC pasando como parámetro la llave compartida API KEY y la cadena a firmar para obtener el MAC final; esto es `HMAC(API KEY, ID||Ts||URL)`. 
 
 ## Envío:
 
 El cliente envía la solicitud HTTP con los metadatos necesarios en el header:
 
-1). El cliente envía la solicitud HTTP, por ejemplo, `GET /data/profile`
+1). El cliente envía la solicitud HTTP, por ejemplo, `GET /data/profile`.
+
 2). Se incluye en los headers del envío la $${\color{Red}ID}$$, $${\color{Blue}Ts}$$ y $${\color{Yellos}MAC}$$.
 
 ## Verificación:
@@ -160,11 +162,16 @@ El cliente envía la solicitud HTTP con los metadatos necesarios en el header:
 El servidor valida la autenticidad del mensaje y lo valida:
 
 1). El servidor recibe la consulta del cliente y los headers.
+
 2). El servidor primero valida que el timestamp esté dentro de la ventana del tiempo.
+
 3). El servidor construye la cadena el cuál utilizó el cliente para el firmado en base a los parámetros del header.
+
 4). El servidor busca la API Key del cliente.
+
 5). Calcula el MAC usando el algoritmo HMAC.
-6). Finalmente compara las firmas, y en base al resultado envía un código 200 con la respuesta esperada 
+
+6). Finalmente compara las firmas, y en base al resultado envía un código $${\color{Green}200}$$ con la respuesta esperada, $${\color{Red}208}$$ correspondiente a un Time out o $${\color{Red}401}$$ MAC invalido. 
 
 
 
