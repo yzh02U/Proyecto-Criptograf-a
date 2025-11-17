@@ -157,9 +157,109 @@ El servidor valida la autenticidad del mensaje:
 
 6). Finalmente compara las firmas, y en base al resultado envía un código $${\color{Green}200}$$ con la respuesta esperada, $${\color{Red}208}$$ correspondiente a un Time out o $${\color{Red}401}$$ MAC invalido. 
 
+# Prototipo inicial
+
+Para la primera etapa del proyecto se implementó un prototipo básico del sistema de autenticación basado en HMAC.  
+Este prototipo permite validar las funciones principales del flujo de autenticación antes de desarrollar la versión completa cliente-servidor.
+
+El objetivo del prototipo es demostrar:
+
+- La construcción correcta de un mensaje de autenticación por parte del cliente (username, timestamp, nonce, operación y payload).
+- La generación del MAC utilizando distintas funciones hash (MD5, SHA-256 y SHA3-256).
+- La verificación en el servidor, incluyendo validación de:
+  - Usuario válido.
+  - Algoritmo de hash soportado.
+  - Ventana de tiempo.
+  - Protección contra replay mediante nonces usados.
+  - Integridad del MAC.
+
+A continuación se presentan las funciones principales implementadas:
+
+---
+
+### **1. Construcción del mensaje por parte del cliente**
+
+```python
+req = build_auth_request("alice", "SHA256", {"note": "hola mundo"})
+print(req)
+```
+
+### Ejemplo de salida:
+
+```json
+{
+  "username": "alice",
+  "ts": 1763340075,
+  "nonce": "b0454ad96fbb3b18970d2b44d7bac48e",
+  "op": "AUTH",
+  "payload": {"note": "hola mundo"},
+  "alg": "SHA256",
+  "mac": "5a27666cc9cfb740a9f288c23dc92f2dc784f7bf0ad8c68901f241eaeecf6e4"
+}
+```
 
 
+### **2. Verificación en el servidor**
 
+resp = verify_auth_request(req)
+print(resp)
+
+### Ejemplo
+
+```json
+{
+  "status": "ok",
+  "server_ts": 1763340075,
+  "nonce": "b0454ad96fbb3b18970d2b44d7bac48e",
+  "alg": "SHA256",
+  "mac_resp": "493351369c147c049dfa1888664577ff6dd3339ea1d33098971817c26c985f5"
+}
+```
+
+# Validación preliminar
+
+Para verificar que las primitivas criptográficas y las reglas del protocolo funcionan correctamente, se implementaron pruebas unitarias que evalúan distintos escenarios de autenticación.  
+Estas pruebas permiten validar comportamiento esperado tanto en casos correctos como en ataques comunes.
+
+Los casos considerados fueron:
+
+- **Caso OK:** mensaje válido y MAC correcto.
+- **Replay attack:** reutilización del mismo nonce.
+- **Usuario desconocido:** el servidor no reconoce al emisor.
+- **Algoritmo no soportado:** el cliente solicita un hash inválido.
+- **Timestamp antiguo:** ataque de desincronización temporal.
+- **Mensaje modificado:** integridad comprometida (MAC inválido).
+
+A continuación se presentan salidas reales generadas por el prototipo:
+
+### **Salida de las pruebas:**
+
+```bash
+== OK ==
+{'username': 'alice', 'ts': 1763340085, 'nonce': '45861ed71481bdca63b2b2b1b896ea57', 'op': 'AUTH', 'payload': {'note': 'hola'}, 'alg': 'SHA256', 'mac': 'e04010e775c3b320fdc7dc523c3d0ab34c1941f1fe0b11f6213a075031b70486'}
+{'status': 'OK', 'server_ts': 1763340085, 'nonce': '45861ed71481bdca63b2b2b1b896ea57', 'alg': 'SHA256', 'mac_resp': 'd8f68c85a1c64d6c9d82108d2df140820694805a23e7833c631363712999f62e'}
+
+== REPLAY ==
+{'username': 'alice', 'ts': 1763340085, 'nonce': '2d58581331b36c623acea6da5f39611a', 'op': 'AUTH', 'payload': {'note': 'hola'}, 'alg': 'SHA256', 'mac': '15995cecca0a372d09f2f677007577c138c6c55610f0cff3911216008f4e2af4'}
+{'status': 'OK', 'server_ts': 1763340085, 'nonce': '2d58581331b36c623acea6da5f39611a', 'alg': 'SHA256', 'mac_resp': 'a4de7e6928492d7ee2580f4a1133462ccd2c0cfb94faf0e94554ec7e6da26781'}
+{'status': 'FAIL', 'err': 'ERR_NONCE_REPLAY'}
+
+== UNKNOWN_USER ==
+{'username': 'mallory', 'ts': 1763340085, 'nonce': '123', 'op': 'AUTH', 'payload': {}, 'alg': 'SHA256', 'mac': '0000000000000000000000000000000000000000000000000000000000000000'}
+{'status': 'FAIL', 'err': 'ERR_USER_UNKNOWN'}
+
+== BAD_ALG ==
+{'username': 'alice', 'ts': 1763340085, 'nonce': '76cdb7a3e540c9be43a39ad3fb797967', 'op': 'AUTH', 'payload': {'note': 'hola'}, 'alg': 'WHATEVER', 'mac': '6dd5f4db4211f99e6ea1452e5943c0acaaf9540ad68e59dcf8815a9aafd84a02'}
+{'status': 'FAIL', 'err': 'ERR_ALG_UNSUPPORTED'}
+
+== OLD_TS ==
+{'username': 'alice', 'ts': 1763339085, 'nonce': '5b59ed6bd459dfbbcd3da55dd6f30abc', 'op': 'AUTH', 'payload': {'note': 'hola'}, 'alg': 'SHA256', 'mac': 'b90a0b732e18fef1757d8cd7001be0e1804214928b019d221e1cc82611b7f80b'}
+{'status': 'FAIL', 'err': 'ERR_TIME_SKEW'}
+
+== TAMPERED ==
+{'username': 'alice', 'ts': 1763340085, 'nonce': '763a6607b3c381a8cf910d649d21897a', 'op': 'AUTH', 'payload': {'note': 'ataque'}, 'alg': 'SHA256', 'mac': '77d488fba0b464dd29f4d976c5cd5782000df11d489a01f57bc1f526b989a38c'}
+{'status': 'FAIL', 'err': 'ERR_MAC_INVALID'}
+```
 
 # Referencias:
 - https://csrc.nist.gov/pubs/fips/198-1/final
