@@ -117,7 +117,7 @@ El proceso se dividirá en cuatro etapas fundamentales: *Preparación, firma, en
 ## Preparación:
 El cliente recopila los datos necesarios para la autenticación y la integridad:
 
-1). El cliente se registra en una plataforma al cual desea consultar recursos. Al momento del registro solicita una API Key o Token al servidor, de manera que el cliente pueda consultar recursos y el servidor le permitar autenticar el usuario. El Token debe ser enviado al cliente mediante un canal seguro distinto al convencional, en donde se realizarían las consultas. Existen protocolos que lo implementan como TLS, una versión mejorada del SSL.
+1). El cliente se registra en una plataforma a la cual desea consultar recursos. Al momento del registro solicita una API Key o Token al servidor, de manera que el cliente pueda consultar recursos y el servidor le permitar autenticar el usuario. El Token debe ser enviado al cliente mediante un canal seguro distinto al convencional, en donde se realizarían las consultas. Existen protocolos que lo implementan como TLS, una versión mejorada del SSL.
 
 2). El cliente genera su $${\color{Red}ID}$$ de identificador en la plataforma.
 
