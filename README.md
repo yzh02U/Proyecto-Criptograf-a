@@ -25,7 +25,8 @@ Diseñar e implementar un sistema de autenticación de usuarios basado en HMAC, 
 En el contexto de la criptografía, la integridad es una propiedad fundamental de la seguridad de la información que asegura que la información transmitida no han sido modificados, alterados, destruidos o perdidos de manera no autorizada, ya sea por ejemplo, por un tercero (intencional o accidental) durante el almacenamiento o transmisión. La información debe ser consistente por el lado del remitente como también en el receptor. La utilización de algoritmos de Hashing son una buena herramienta que otorgan integridad en la data, pero si no se combinan con otras mecánicas, pueden perder efectividad, logrando así, que a pesar de los esfuerzos en la seguridad, que de todas maneras un atacante logre inyectar un mensaje al receptor sin que este se dé cuenta. Para ilustrar lo anterior, vea el siguiente diagrama:
 
 
-<img width="1582" height="672" alt="image" src="https://github.com/user-attachments/assets/452d62f4-466e-4c11-bfd4-f7af33396287" />
+<img width="766" height="390" alt="image" src="https://github.com/user-attachments/assets/c470c8e3-7e7f-43fd-bfab-04450c79417c" />
+
 
 Suponga usted el escenario compuesto por un emisor A, receptor B y un atacante C:
 
@@ -35,7 +36,8 @@ Suponga usted el escenario compuesto por un emisor A, receptor B y un atacante C
 - B compara el digest que ha calculado y lo compara con el recibido.
 - Si los dos digest son iguales es que el mensaje no ha sido modificado.
 
-  <img width="1677" height="840" alt="image" src="https://github.com/user-attachments/assets/e3a64f51-1bdd-47d3-b1af-1dd9fe8cb02e" />
+<img width="761" height="557" alt="image" src="https://github.com/user-attachments/assets/e8d9ca80-6c17-46a5-a34e-08b272f2d30e" />
+
 
 - A decide repetir el mismo paso anterior, calcula el digest y lo envía junto al mensaje.
 - Aparece el actor C e intercepta el mensaje.
@@ -110,7 +112,7 @@ El diagrama es el siguiente:
 
 Entendido el funcionamiento del propio algoritmo, se diseña el protocolo para asegurar su correcto funcionamiento.
 
-# Protocólo:
+# Protocolo:
 
 El proceso se dividirá en cuatro etapas fundamentales: *Preparación, firma, envío y verificación*. Para ser más específico, el contexto de la implementación será llevado en un modelo cliente-servidor para consultas de API bajo el modelo REST, pudiendo así, el usuario consultar recursos al servidor mediante los verbos GET, PUT, POST, etc.   
 
