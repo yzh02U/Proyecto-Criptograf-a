@@ -107,7 +107,9 @@ Los pasos del algoritmo se muestran en la siguiente tabla:
 
 El diagrama es el siguiente:
 
-<img width="1250" height="1590" alt="image" src="https://github.com/user-attachments/assets/cea24de2-f42b-4e95-80a8-da8b65b586ee" />
+<img width="591" height="793" alt="image" src="https://github.com/user-attachments/assets/fcaed2cf-2161-43de-83e4-6740eeeb1cc2" />
+
+
 
 
 Entendido el funcionamiento del propio algoritmo, se diseña el protocolo para asegurar su correcto funcionamiento.
