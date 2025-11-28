@@ -1,10 +1,9 @@
-︠48db5505-e870-4b8d-b454-74300134518as︠
-#QUE PASA CHAVALEEEES
-print("你妈妈很胖")
-︡40126165-7d78-478d-93eb-72ff6d0e8cb5︡{"stdout":"你妈妈很胖\n"}︡{"done":true}
-︠e9e0e6aa-6dd7-4599-9050-225400c516e6s︠
+︠48db5505-e870-4b8d-b454-74300134518a︠
 
-# Objetivo: Implementar un sistema de autenticación funcional basado en HMAC, integrando múltiples funciones hash (MD5, Whirlpool, SHA-256 y SHA-3) y comparando su rendimiento y nivel de seguridad, acompañado de una interfaz de usuario que permita visualizar el proceso de autenticación y la verificación de integridad y autenticidad del mensaje.
+︡40126165-7d78-478d-93eb-72ff6d0e8cb5︡{"stdout":"你妈妈很胖\n"}︡{"done":true}
+︠e9e0e6aa-6dd7-4599-9050-225400c516e6︠
+
+# Objetivo: Implementar un sistema de autenticación funcional basado en HMAC, integrando múltiples funciones hash (MD5, SHA-256 y SHA-3) y comparando su rendimiento y nivel de seguridad, acompañado de una interfaz de usuario que permita visualizar el proceso de autenticación y la verificación de integridad y autenticidad del mensaje.
 
 import hmac
 import hashlib
@@ -12,7 +11,7 @@ import secrets
 import time
 import json
 ︡3fca5ae4-ca7d-44e4-a316-36303c1fc4aa︡{"done":true}
-︠23f1a519-e09d-475d-b674-71255840b9ebs︠
+︠23f1a519-e09d-475d-b674-71255840b9eb︠
 # 1) Algoritmos de hash soportados
 
 ALGORITHMS = {
@@ -23,50 +22,56 @@ ALGORITHMS = {
 }
 
 
+# Obtiene la función de hash de hashlib dada una etiqueta. Si el nombre no está en el diccionario ALGORITHMS, no lo acepta.
 def get_hash_func(name: str):
-    """Obtiene la función de hash de hashlib dada una etiqueta."""
-    if name not in ALGORITHMS:
+    if name not in ALGORITHMS:                  # Para los algoritmos de hash que no existen en ALGORITHMS
         raise ValueError(f"Algoritmo no soportado: {name}")
     return ALGORITHMS[name]
 ︡7d8dd334-81a2-430b-8cf1-bdcf13da8873︡{"done":true}
-︠f22338b4-ced1-49ac-8700-15274b825aecs︠
+︠f22338b4-ced1-49ac-8700-15274b825aec︠
 #2) Helpers para formatos
 
+# Helper para canonizar el payload. Payload canonico: JSON del payload pasado a una forma fija y única en bytes
+# Para que el payload tenga una única representación. Si el mismo mensaje puede tener dos strings distintos, el hash (y el HMAC) cambiarían aunque el contenido sea “igual”.
 def canon_payload(payload):
-    """JSON compacto y con claves ordenadas, en bytes."""
+    # Es un diccionario vacio si no tiene datos.
     if payload is None:
         payload = {}
+    # convierte el dict a un string JSON. y que no ponga espacios despues de , y :. Con claves ordenadas alfabéticamente (para evitar que HMAC cambie porque los formatos están en orden distinto) y el utf-8 convierte el String a bytes, que es lo que consume las funciones de Hash y HMAC
     return json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
+# Construye la cadena canónica: username|ts|nonce|op|HASH(payload_min)
+
+# op = Operation (LOGIN, TRANSFER)
+
+
+# Retorna una String canonica en bytes
 def make_request_string(username, ts, nonce, op, payload, hash_func):
-    """
-    Construye la cadena canónica:
-    username|ts|nonce|op|HASH(payload_min)
-    """
     payload_bytes = canon_payload(payload)
     payload_hash = hash_func(payload_bytes).hexdigest()
     s = f"{username}|{ts}|{nonce}|{op}|{payload_hash}"
     return s.encode("utf-8")
 
 
+#  Calcula HMAC(key, message) con el hash indicado. Se crea un objeto con la key, mensaje y la función hash. Con hexdigest() devuelve el HMAC en string hexadecimal.
 def compute_hmac(key: bytes, message: bytes, hash_func):
-    """Calcula HMAC(key, message) con el hash indicado."""
     return hmac.new(key, message, hash_func).hexdigest()
 ︡74288797-0583-47db-acdd-ea06bc2401a4︡{"done":true}
-︠00064dcf-56bd-47c3-bd51-e7c686b82074s︠
-# 3) “Base de datos” de usuarios (demo)
+︠00064dcf-56bd-47c3-bd51-e7c686b82074︠
+# 3) “Base de datos” de usuarios (demo) el cual es un diccionario
 
 USERS = {
-    # En un sistema real, K_user se generaría y almacenaría en un lugar seguro
+    # En un sistema real, K_user (clave secreta simetrica) se generaría y almacenaría en un lugar seguro. Lo comparte el usuario y el servidor.
+    # genera 32 bytes criptográficamente aleatorios
     "alice": secrets.token_bytes(32),
     "bob": secrets.token_bytes(32),
 }
 
-USED_NONCES = set()  # pares (username, nonce) ya usados
-WINDOW = 60          # ventana temporal en segundos
+USED_NONCES = set()  # pares (username, nonce) ya usados. Para evitar replay attacks.
+WINDOW = 60          # ventana temporal en segundos que se acepta para el Timestamp
 ︡3f92b8cc-c63c-492e-b736-37940afb8d17︡{"done":true}
-︠77dd9659-78b6-45c6-8a7b-ddc32ac61d33s︠
+︠77dd9659-78b6-45c6-8a7b-ddc32ac61d33︠
 # 4) Cliente: construye AuthRequest
 
 
@@ -75,24 +80,24 @@ WINDOW = 60          # ventana temporal en segundos
 #   username, ts, nonce, op, payload, alg, mac
 #}
 
-
+# retorna un request autenticada del cliente.
 def build_auth_request(username: str, alg_name: str, payload=None):
-    if username not in USERS:
+    if username not in USERS:            # Para los usuarios que no existen en la DB USERS.
         raise ValueError("Usuario desconocido en este demo (USERS)")
 
-    key = USERS[username]
-    hash_func = get_hash_func(alg_name)
+    key = USERS[username]                  # Recupera la clave asociada al usuario
+    hash_func = get_hash_func(alg_name)    # Usa la función hash
 
-    ts = int(time.time())
+    ts = int(time.time())          # Empieza el timestamp en entero para enviarlo más simple (facil de comparar).
     nonce = secrets.token_hex(16)  # 16 bytes -> 32 hex chars
     op = "AUTH"
 
-    msg = make_request_string(username, ts, nonce, op, payload, hash_func)
-    mac = compute_hmac(key, msg, hash_func)
+    msg = make_request_string(username, ts, nonce, op, payload, hash_func)         # String canonica en bytes
+    mac = compute_hmac(key, msg, hash_func)                                        # El HMAC de esa string canonica. El cual sirve para verificar. Si se cambia el contenido del mensaje, no calzaria el HASH.
 
     request = {
         "username": username,
-        "ts": ts,
+        "ts": ts,                          # Timestamp, la hora en que se creó el mensaje.
         "nonce": nonce,
         "op": op,
         "payload": payload or {},
@@ -101,7 +106,7 @@ def build_auth_request(username: str, alg_name: str, payload=None):
     }
     return request
 ︡dc36ae9c-7012-4b48-8479-3c6f1d828441︡{"done":true}
-︠ca0e0609-8618-4036-af05-6875195b85a8s︠
+︠ca0e0609-8618-4036-af05-6875195b85a8︠
 # 5) Servidor: verifica AuthRequest y responde AuthResponse
 
 #Verifica el HMAC y las condiciones básicas.
@@ -117,7 +122,7 @@ def verify_auth_request(request: dict):
     alg_name = request.get("alg")
     mac_cli = request.get("mac")
 
-    now = int(time.time())
+    now = int(time.time())                                        # Fija la hora actual
 
     # 1) Usuario
     if username not in USERS:
@@ -132,26 +137,27 @@ def verify_auth_request(request: dict):
         return {"status": "FAIL", "err": "ERR_ALG_UNSUPPORTED"}
 
     # 3) Ventana temporal
-    if abs(now - ts) > WINDOW:
+    if abs(now - ts) > WINDOW:                                     # Rechaza si el mensaje es muy viejo o muy adelantado (ts > now) si esa diferencia es mayor que 60 segundos, con ayuda del valor absoluto para diferencias negativas.
         return {"status": "FAIL", "err": "ERR_TIME_SKEW"}
 
     # 4) Replay (nonce)
-    if (username, nonce) in USED_NONCES:
+    if (username, nonce) in USED_NONCES:                           # Falla si ese Nonce se usó.
         return {"status": "FAIL", "err": "ERR_NONCE_REPLAY"}
 
     # 5) Verificar HMAC
     msg = make_request_string(username, ts, nonce, op, payload, hash_func)
     mac_srv = compute_hmac(key, msg, hash_func)
 
-    if not hmac.compare_digest(mac_cli, mac_srv):
+    if not hmac.compare_digest(mac_cli, mac_srv):                   # si el HMAC que mandó el cliente es distinto al HMAC recien calculado,
         return {"status": "FAIL", "err": "ERR_MAC_INVALID"}
 
     # Si todo OK, registrar nonce y responder
     USED_NONCES.add((username, nonce))
-    server_ts = now
+    server_ts = now                                            # Timestamp del servidor para la respuesta
     resp_str = f"OK|{server_ts}|{nonce}".encode("utf-8")
     mac_resp = compute_hmac(key, resp_str, hash_func)
 
+    # No se envia el resp_str porque el usuario puede armar el mismo formato de resp_str con las componentes que vienen de la respuesta y hacer el HMAC para comparar.
     response = {
         "status": "OK",
         "server_ts": server_ts,
@@ -177,7 +183,7 @@ for alg in ["MD5", "SHA256", "SHA3_256"]:
     resp2 = verify_auth_request(req)
     print("Replay attempt:", resp2)
 ︡1a4209f8-7770-409a-ab36-f8be3dc25e33︡{"stdout":"\n=== Prueba de autenticación con MD5 ===\nRequest: {'username': 'alice', 'ts': 1763340075, 'nonce': 'd51e00f42ab92594fb2a8ea962a6e009', 'op': 'AUTH', 'payload': {'note': 'hola mundo'}, 'alg': 'MD5', 'mac': 'c3fc1f838121367a4971a8ea9eb9f592'}\nResponse: {'status': 'OK', 'server_ts': 1763340075, 'nonce': 'd51e00f42ab92594fb2a8ea962a6e009', 'alg': 'MD5', 'mac_resp': '1e62e9633f45ffb89be89c255f37fb09'}\nReplay attempt: {'status': 'FAIL', 'err': 'ERR_NONCE_REPLAY'}\n\n=== Prueba de autenticación con SHA256 ===\nRequest: {'username': 'alice', 'ts': 1763340075, 'nonce': 'b0454ad96fbb3b18970d2b44d7bac48e', 'op': 'AUTH', 'payload': {'note': 'hola mundo'}, 'alg': 'SHA256', 'mac': '5a27666cc9cfb740a9f288c23dc92f2dc784f7bf0ad8c68901f241eaeecf6e4c'}\nResponse: {'status': 'OK', 'server_ts': 1763340075, 'nonce': 'b0454ad96fbb3b18970d2b44d7bac48e', 'alg': 'SHA256', 'mac_resp': '493351369c147c049dfa1888664577ff6dd3339ea1d33098971817c26c985f5b'}\nReplay attempt: {'status': 'FAIL', 'err': 'ERR_NONCE_REPLAY'}\n\n=== Prueba de autenticación con SHA3_256 ===\nRequest: {'username': 'alice', 'ts': 1763340075, 'nonce': '51d1c4b48bfae5ab551c0baf915cdd32', 'op': 'AUTH', 'payload': {'note': 'hola mundo'}, 'alg': 'SHA3_256', 'mac': '15f54d133f457fbf28c9e3b9a4abc4af27a997d147b7c4b9ac803f662d331cd3'}\nResponse: {'status': 'OK', 'server_ts': 1763340075, 'nonce': '51d1c4b48bfae5ab551c0baf915cdd32', 'alg': 'SHA3_256', 'mac_resp': '7f9b7c0eab35313616a725e03d7f89b71df2ca8b644cf0e4f23a9d556aaf46a1'}\nReplay attempt: {'status': 'FAIL', 'err': 'ERR_NONCE_REPLAY'}\n"}︡{"done":true}
-︠a2c461c9-3e42-4624-949e-0c9fbf539459s︠
+︠a2c461c9-3e42-4624-949e-0c9fbf539459︠
 # Pruebas de caso de validación
 
 def test_ok():
@@ -222,6 +228,8 @@ def test_tampered_payload():
     resp = verify_auth_request(req)
     return "TAMPERED", req, resp
 
+
+# lista de funciones
 tests = [
     test_ok,
     test_replay,
@@ -232,7 +240,8 @@ tests = [
 ]
 
 for t in tests:
-    name, *rest = t()
+    # El primer elemento de la tupla (Label) y *rest es el resto de los valores que los mete en una lista por el *S (req y resp). Es un desempaquetamiento.
+    name, *rest = t()            # Una función t() que devuelve una tupla.
     print("\n==", name, "==")
     for r in rest:
         print(r)
