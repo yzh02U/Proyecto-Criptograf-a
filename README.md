@@ -275,6 +275,19 @@ En esta sección se adjunta una comparación de los distintos algoritmos hashes 
 
 <img width="855" height="552" alt="image" src="https://github.com/user-attachments/assets/56807f5e-4fe3-4e90-8930-e8118aa51508" />
 
+### Ranking de Rendimiento
+
+Resultados promedio tras ejecutar **50,000,000 iteraciones** por algoritmo.
+
+| Ranking | Algoritmo | Tiempo (ms) | Tiempo ($\mu s$) | Observación |
+| :---: | :--- | :--- | :--- | :--- |
+| 1 | **SHA1** | `0.00263` | **2.63 µs** | El más veloz (pero inseguro). |
+| 2 | **SHA256** | `0.00269` | **2.69 µs** | Muy optimizado, casi igual a SHA1. |
+| 3 | **MD5** | `0.00279` | **2.79 µs** | Ligeramente más lento que SHA256 en esta prueba. |
+| 4 | **SHA_512** | `0.00340` | **3.40 µs** | Eficiente en arquitecturas de 64 bits. |
+| 5 | **SHA3_512** | `0.00396` | **3.96 µs** | Menor overhead inicial que su versión de 256. |
+| 6 | **SHA3_256** | `0.00412` | **4.12 µs** | Mayor costo computacional por iteración. |
+| 7 | **WHIRLPOOL** | `0.00616` | **6.16 µs** | El más lento (algoritmo pesado de 512 bits). |
 
 ### Comparación de Tamaño de Salida
 
@@ -288,7 +301,30 @@ En esta sección se adjunta una comparación de los distintos algoritmos hashes 
 | **SHA_512** | 128 | 512 |
 | **WHIRLPOOL** | 128 | 512 |
 
+Las pruebas han revelado resultados inesperados influenciado por la arquitectura y complejidad de su algoritmo. Note que los algoritmos SHA1-SHA256 son los más rápidos, a pesar de tener arquitecturas diferentes entre unos 0.0026-0.0028 milisegundos. Su motivo principal es el diseño interno a nivel lógico, dado que utilizan operaciones básicas (AND, OR, XOR, rotaciones de bits y sumas modulares), por lo que su estructura es diseñado para ser rápido en ejecución.
+
+La famila del SHA3 son más lentos en general y no se debe a la optimización en sí, sino a su diseño. Es que el SHA-3 realiza permutaciones sobre una matriz de estado de 1600 bits, por lo que mover una matriz muy grande requiere más ciclos lógicos que las variables de estado más pequeños de SHA-2. Lo anterior sacrifica algo de rendimiento por robustez. Note un detalle importante, el SHA3 512 es más rápido que el SHA3 256 y radica en la arquitectura esponja en sí. Recuerde que la función esponja depende de dos parámetos correspondientes al ratio o velocidad de procesamiento `r`  y capacidad `c` donde se inicializa un vector nulo para asegurar la seguridad en el sistema. Según el estándar FIPS-PUB 202 del NIST el tamaño de la capacidad se define como:
+
+```math
+c = 2 \cdot Tamaño\_salida
+
+```
+
+Luego los bloques internos:
+
+| Algoritmo | c | Bits restantes bloque |
+| :--- | :---: | :---: |
+| **SHA3-256** | 512 | 1088 (136 bytes)|
+| **SHA3-512** | 1024 | 576 (72 bytes)|
+
+
+Por lo tanto los bloques a procesar del SHA3 512 procesa bloques mucho más pequeño y por ende es más eficiente. Por último la función Whirpool fue el más lento en sus pruebas porque utiliza una arquitectura basado en el cifrado AESrepetida en 10 rondas de una matriz de 512 bits.
+
+En términos de seguidad,la paradoja del cumpleaños indica que es posible encontrar una colisión hash de n bits solamente se necesita probar $2^{n/2}$ combinaciones. Por lo tanto, los sistemas más robustos se encuentran los hashes cuyas salidas contienen la mayor cantidad de bits, por ejemplo, SHA3 512 o Whirpool; mientras que aquellos con menor cantidad de bits de salida se pueden romper con mayor facilidad, por lo que MD5 y SHA-1 son triviales para los ataques modernos.   
+
+
 
 # Referencias:
 - https://csrc.nist.gov/pubs/fips/198-1/final
 - https://www.rfc-editor.org/rfc/rfc2104.html
+- https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.202.pdf
