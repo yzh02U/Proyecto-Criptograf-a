@@ -320,7 +320,9 @@ Luego los bloques internos:
 
 Por lo tanto los bloques a procesar del SHA3 512 procesa bloques mucho más pequeño y por ende es más eficiente. Por último la función Whirpool fue el más lento en sus pruebas porque utiliza una arquitectura basado en el cifrado AESrepetida en 10 rondas de una matriz de 512 bits.
 
-En términos de seguidad,la paradoja del cumpleaños indica que es posible encontrar una colisión hash de n bits solamente se necesita probar $2^{n/2}$ combinaciones. Por lo tanto, los sistemas más robustos se encuentran los hashes cuyas salidas contienen la mayor cantidad de bits, por ejemplo, SHA3 512 o Whirpool; mientras que aquellos con menor cantidad de bits de salida se pueden romper con mayor facilidad, por lo que MD5 y SHA-1 son triviales para los ataques modernos.   
+En términos de seguidad,la paradoja del cumpleaños indica que es posible encontrar una colisión hash de n bits solamente se necesita probar $2^{n/2}$ combinaciones. Por lo tanto, los sistemas más robustos se encuentran los hashes cuyas salidas contienen la mayor cantidad de bits, por ejemplo, SHA3 512 o Whirpool; mientras que aquellos con menor cantidad de bits de salida se pueden romper con mayor facilidad, por lo que MD5 y SHA-1 son triviales para los ataques modernos.
+
+A pesar de todo lo anteior, todos los algoritmos demuestran una fiabilidad en el efecto avalancha. Esto ayuda a ocultar patrones y romper cualquier esquema lógico evidente del mensaje oiginal en donde un cambio mínimo en un bit produce un resultado muy diferente.  
 
 
 
