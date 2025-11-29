@@ -265,6 +265,30 @@ A continuación se presentan salidas reales generadas por el prototipo:
 {'status': 'FAIL', 'err': 'ERR_MAC_INVALID'}
 ```
 
+
+# Resultados 
+
+En esta sección se adjunta una comparación de los distintos algoritmos hashes incorporados en Hmac. Observe los siguientes resultados:
+
+
+<img width="873" height="552" alt="image" src="https://github.com/user-attachments/assets/2a221a38-16e1-4093-aac4-0c249fc7baa9" />
+
+<img width="855" height="552" alt="image" src="https://github.com/user-attachments/assets/56807f5e-4fe3-4e90-8930-e8118aa51508" />
+
+
+### Comparación de Tamaño de Salida
+
+| Algoritmo | Caracteres | Bits |
+| :--- | :---: | :---: |
+| **MD5** | 32 | 128 |
+| **SHA1** | 40 | 160 |
+| **SHA256** | 64 | 256 |
+| **SHA3_256** | 64 | 256 |
+| **SHA3_512** | 128 | 512 |
+| **SHA_512** | 128 | 512 |
+| **WHIRLPOOL** | 128 | 512 |
+
+
 # Referencias:
 - https://csrc.nist.gov/pubs/fips/198-1/final
 - https://www.rfc-editor.org/rfc/rfc2104.html
