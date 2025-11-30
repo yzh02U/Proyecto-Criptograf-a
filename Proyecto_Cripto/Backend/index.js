@@ -1,40 +1,54 @@
-// /server/index.js
+require("dotenv").config();
 const express = require("express");
-const cors = require("cors"); // Permite que React se comunique con este servidor
-const crypto = require("crypto");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const http = require("http"); // 1. Importamos HTTP nativo
+const { Server } = require("socket.io"); // 2. Importamos Socket.io
 
 const app = express();
+
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// LA CLAVE SECRETA (Nunca sale de este archivo)
-const SECRET_KEY = "mi_secreto_super_seguro_banco_123";
+// 3. Crear el servidor HTTP envolviendo a Express
+const server = http.createServer(app);
 
-app.post("/api/validar", (req, res) => {
-  const { mensaje, hmacRecibido } = req.body;
-
-  console.log("Recibido:", mensaje);
-
-  // 1. El servidor calcula SU propio hash con el mensaje que llegó
-  const hmacCalculado = crypto
-    .createHmac("sha256", SECRET_KEY)
-    .update(mensaje)
-    .digest("hex");
-
-  // 2. Compara el calculado con el que envió el cliente
-  if (hmacCalculado === hmacRecibido) {
-    res.json({
-      status: "success",
-      texto: "✅ Transacción Aprobada: Integridad Correcta",
-    });
-  } else {
-    res.json({
-      status: "error",
-      texto: "❌ ALERTA: Los datos fueron modificados (Ataque Detectado)",
-    });
-  }
+// 4. Configurar Socket.io
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+  },
 });
 
-app.listen(3001, () => {
-  console.log("Servidor del Banco corriendo en puerto 3001");
+// 5. Manejar conexiones de Socket
+io.on("connection", (socket) => {
+  console.log(` Atacante conectado: ${socket.id}`);
+
+  socket.on("disconnect", () => {
+    console.log(` Atacante desconectado: ${socket.id}`);
+  });
+});
+
+// 6. Inyectar 'io' en las rutas (Middleware)
+// Esto permite que tus rutas en 'userRoutes.js' puedan usar req.io.emit()
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
+// Rutas
+app.use("/api/users", require("./Routes/userRoutes"));
+
+// Conexión a Mongo
+const MONGO_URI = process.env.MONGO_URI;
+mongoose
+  .connect(MONGO_URI)
+  .then(() => console.log(" Conectado a MongoDB"))
+  .catch((err) => console.error(" Error de conexión:", err));
+
+const PORT = 3001;
+server.listen(PORT, () => {
+  console.log(` Servidor (HTTP + WebSockets) corriendo en puerto ${PORT}`);
 });
