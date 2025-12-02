@@ -7,6 +7,13 @@ Asignatura: TEL252 – Criptografía y Seguridad de la Información
 
 Profesor: Luis Lizama  
 
+# Experimento
+
+Si desea ver el prototipo funcional, acceda al siguiente enlace:
+
+https://github.com/yzh02U/Proyecto-Criptograf-a/tree/Experimento
+
+
 # Definición del problema:
 
 Los sistemas de autenticación tradicionales que transmiten contraseñas o tokens en texto claro presentan vulnerabilidades frente a ataques de interceptación y modificación de datos. 
